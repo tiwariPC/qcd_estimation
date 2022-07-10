@@ -262,8 +262,8 @@ fin = ROOT.TFile.Open(inputfile, "READ")
 
 mainhisto = fin.Get("qcdDphiCTS_tot")
 
-# myFunc = "[0]*exp([1]*x)"
-myFunc = "[0]*(1-x)/([1]+(x^[2])*exp([3]*x))"
+myFunc = "[0]*exp([1]*x)"
+# myFunc = "[0]*(1-x)/([1]+(x^[2])*exp([3]*x))"
 
 
 # myFunc = "[0]*(1-x)^[1]/(x^([2]+[3]*log(x)))"
@@ -272,4 +272,4 @@ myFunc = "[0]*(1-x)/([1]+(x^[2])*exp([3]*x))"
 # myFunc = "([0]+[1]*x+[2]*pow(x,2)+[3]*pow(x,3)+[4]*pow(x,4)+[5]*pow(x,5)+[6]*pow(x,6)+[7]*pow(x,7)+[8]*pow(x,8)+[9]*pow(x,9))"
 
 
-fitWorkflow(mainhisto,myFunc,4,0.20)
+fitWorkflow(mainhisto,myFunc,2,0.15)

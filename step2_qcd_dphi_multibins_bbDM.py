@@ -27,11 +27,11 @@ else:
 file_in = ROOT.TFile(inputfile, 'READ')
 file_out = ROOT.TFile(outputfile, 'RECREATE')
 
-# binx_ = np.linspace(0.0, 1.0, num=41)
-binx_ = np.linspace(0.0, 3.14, num=101)
+binx_ = np.linspace(0.0, 1.0, num=41)
+# binx_ = np.linspace(0.0, 3.14, num=101)
 
 qcdDphiCTS = {}
-total_bins = 50
+total_bins = 4
 
 for key in range(1,total_bins+1):
   qcdDphiCTS[key] = ROOT.TH1F('qcdDphiCTS_bin'+str(key),'qcdDphiCTS_bin'+str(key),len(binx_)-1,array.array('d', binx_))
@@ -278,6 +278,7 @@ for x in range(1,QCD.GetXaxis().GetNbins()+1):
   yVal_tot = integral-total_bin
   qcdDphiCTS_tot.SetBinContent(ibin, yVal_tot)
   qcdDphiCTS_tot2.SetBinContent(ibin, yVal_tot)
+  ibin+=1
 qcdDphiCTS_tot.GetXaxis().SetTitle('minimum #Delta#phi(Jet,MET)')
 qcdDphiCTS_tot.GetYaxis().SetTitle('cos(#theta)* Yield')
 
