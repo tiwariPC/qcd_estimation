@@ -6,7 +6,7 @@ import numpy as np
 import argparse
 
 # ----- command line argument
-usage = "python fitQCD_binwise.py -i <input File> -O <output Directory>"
+usage = "python step3_fitQCD_binwise.py -i <input File> -O <output Directory>"
 parser = argparse.ArgumentParser(description=usage)
 parser.add_argument("-i", "--inputfile", dest="inputfile", default="myfiles.root")
 parser.add_argument("-O", "--outputdir", dest="outputdir", default=".")

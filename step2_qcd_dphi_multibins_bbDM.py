@@ -8,7 +8,7 @@ luminosity = 41.5 * 1000
 import argparse
 
 # ----- command line argument
-usage = "python fitQCD_binwise.py -i <input File> -O <output Directory>"
+usage = "python fitQCD_binwise.py -i <input File> -O <output File>"
 parser = argparse.ArgumentParser(description=usage)
 parser.add_argument("-i", "--inputfile", dest="inputfile", default="myfiles.root")
 parser.add_argument("-o", "--outputfile", dest="outputfile", default="step2_qcd_dphi_multibins_output.root")
