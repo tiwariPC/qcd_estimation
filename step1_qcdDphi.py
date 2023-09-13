@@ -42,12 +42,20 @@ for file_in in files:
   h_total_mcweight.Add(h_tmp_weight)
 
   hist_list = []
-  for df in read_root(file_in, 'monoHbb_SBand_resolved', columns=['min_dPhi', 'MET', 'weight'], chunksize=125000):
-    for dPhi_jetMET, MET, weight in zip(df.min_dPhi, df.MET, df.weight):
+  # for df in read_root(file_in, 'bbDM_QCDbCR_1b', columns=['min_dPhi', 'MET', 'weight'], chunksize=125000):
+  #   for dPhi_jetMET, MET, weight in zip(df.min_dPhi, df.MET, df.weight):
+  #     if dPhi_jetMET == -9999: continue
+  #     # ctsValue = abs(math.tanh(dEtaJet12/2))
+  #     #print(dPhi_jetMET,ctsValue,weight)
+  #     hist_list.append([dPhi_jetMET,MET,weight])
+  #     #qcdDphi.Fill(dPhi_jetMET,ctsValue,weight)
+  
+  for df in read_root(file_in, 'bbDM_QCDbCR_2b', columns=['dPhi_jetMET', 'dEtaJet12', 'weight'], chunksize=125000):
+    for dPhi_jetMET, dEtaJet12, weight in zip(df.dPhi_jetMET, df.dEtaJet12, df.weight):
       if dPhi_jetMET == -9999: continue
-      # ctsValue = abs(math.tanh(dEtaJet12/2))
+      ctsValue = abs(math.tanh(dEtaJet12/2))
       #print(dPhi_jetMET,ctsValue,weight)
-      hist_list.append([dPhi_jetMET,MET,weight])
+      hist_list.append([dPhi_jetMET,ctsValue,weight])
       #qcdDphi.Fill(dPhi_jetMET,ctsValue,weight)
 
   # for df in read_root(file_in, 'bbDM_SR_2b', columns=['dPhi_jetMET', 'dEtaJet12', 'weight'], chunksize=125000):
