@@ -3,15 +3,17 @@ import os, array
 import sys
 import matplotlib.pylab as plt
 import numpy as np
-import sampleXsecFiles.sample_xsec_run2 as sample_xsec
-luminosity = 41.5 * 1000
 import argparse
+import histYearlist
 
+sys.path.append('sampleXsecFiles')
+import sample_xsec_run2 as sample_xsec
 # ----- command line argument
 usage = "python fitQCD_binwise.py -i <input File> -O <output File>"
 parser = argparse.ArgumentParser(description=usage)
 parser.add_argument("-i", "--inputfile", dest="inputfile", default="myfiles.root")
 parser.add_argument("-o", "--outputfile", dest="outputfile", default="step2_qcd_dphi_multibins_output.root")
+parser.add_argument("-y", "--year", dest="year", default="Year")
 
 args = parser.parse_args()
 if args.inputfile == None:
@@ -24,8 +26,31 @@ if args.outputfile == None:
 else:
     outputfile = args.outputfile
 
-file_in = ROOT.TFile(inputfile, 'READ')
-file_out = ROOT.TFile(outputfile, 'RECREATE')
+runOn2016 = False
+runOn2017 = False
+runOn2018 = False
+if args.year == '2016':
+    runOn2016 = True
+elif args.year == '2017':
+    runOn2017 = True
+elif args.year == '2018':
+    runOn2018 = True
+else:
+    print('Please provide on which year you want to run?')
+
+if runOn2016:
+  hist_list = histYearlist.for2016
+  luminosity = 35.90 * 1000
+elif runOn2017:
+  hist_list = histYearlist.for2017
+  luminosity = 41.5 * 1000
+elif runOn2018:
+  hist_list = histYearlist.for2018
+  luminosity = 59.64 * 1000
+
+
+file_in = ROOT.TFile('rootFiles/'+inputfile, 'READ')
+file_out = ROOT.TFile('rootFiles/'+outputfile, 'RECREATE')
 
 binx_ = np.linspace(0.0, 1.0, num=41)
 # binx_ = np.linspace(0.0, 3.14, num=101)
@@ -39,74 +64,6 @@ for key in range(1,total_bins+1):
 qcdDphiCTS_tot = ROOT.TH1F('qcdDphiCTS_tot','qcdDphiCTS_tot',len(binx_)-1,array.array('d', binx_))
 qcdDphiCTS_tot2 = ROOT.TH1F('qcdDphiCTS_tot2','qcdDphiCTS_tot2',len(binx_)-1,array.array('d', binx_))
 
-hist_list = ['DY1JetsToLL_M-50_LHEZpT_150-250_TuneCP5_13TeV-amcnloFXFX-pythia8',
-            'DY1JetsToLL_M-50_LHEZpT_250-400_TuneCP5_13TeV-amcnloFXFX-pythia8',
-            'DY1JetsToLL_M-50_LHEZpT_400-inf_TuneCP5_13TeV-amcnloFXFX-pythia8',
-            'DY1JetsToLL_M-50_LHEZpT_50-150_TuneCP5_13TeV-amcnloFXFX-pythia8',
-            'DY2JetsToLL_M-50_LHEZpT_150-250_TuneCP5_13TeV-amcnloFXFX-pythia8',
-            'DY2JetsToLL_M-50_LHEZpT_250-400_TuneCP5_13TeV-amcnloFXFX-pythia8',
-            'DY2JetsToLL_M-50_LHEZpT_400-inf_TuneCP5_13TeV-amcnloFXFX-pythia8',
-            'DY2JetsToLL_M-50_LHEZpT_50-150_TuneCP5_13TeV-amcnloFXFX-pythia8',
-            'GJets_HT-100To200_TuneCP5_13TeV-madgraphMLM-pythia8',
-            'GJets_HT-200To400_TuneCP5_13TeV-madgraphMLM-pythia8',
-            'GJets_HT-400To600_TuneCP5_13TeV-madgraphMLM-pythia8',
-            'GJets_HT-40To100_TuneCP5_13TeV-madgraphMLM-pythia8',
-            'GJets_HT-600ToInf_TuneCP5_13TeV-madgraphMLM-pythia8',
-            'MET-Run2017B-31Mar2018-v1',
-            'MET-Run2017C-31Mar2018-v1',
-            'MET-Run2017D-31Mar2018-v1',
-            'MET-Run2017E-31Mar2018-v1',
-            'MET-Run2017F-31Mar2018-v1',
-            'QCD_bEnriched_HT1000to1500_TuneCP5_13TeV-madgraph-pythia8',
-            'QCD_bEnriched_HT100to200_TuneCP5_13TeV-madgraph-pythia8',
-            'QCD_bEnriched_HT1500to2000_TuneCP5_13TeV-madgraph-pythia8',
-            'QCD_bEnriched_HT2000toInf_TuneCP5_13TeV-madgraph-pythia8',
-            'QCD_bEnriched_HT200to300_TuneCP5_13TeV-madgraph-pythia8',
-            'QCD_bEnriched_HT300to500_TuneCP5_13TeV-madgraph-pythia8',
-            'QCD_bEnriched_HT500to700_TuneCP5_13TeV-madgraph-pythia8',
-            'QCD_bEnriched_HT700to1000_TuneCP5_13TeV-madgraph-pythia8',
-            'ST_s-channel_4f_leptonDecays_TuneCP5_13TeV-amcatnlo-pythia8',
-            'ST_t-channel_antitop_4f_inclusiveDecays_TuneCP5_13TeV-powhegV2-madspin-pythia8',
-            'ST_t-channel_top_4f_inclusiveDecays_TuneCP5_13TeV-powhegV2-madspin-pythia8',
-            'ST_tW_antitop_5f_inclusiveDecays_TuneCP5_13TeV-powheg-pythia8',
-            'ST_tW_top_5f_inclusiveDecays_TuneCP5_13TeV-powheg-pythia8',
-            'SingleElectron-Run2017B-31Mar2018-v1',
-            'SingleElectron-Run2017C-31Mar2018-v1',
-            'SingleElectron-Run2017D-31Mar2018-v1',
-            'SingleElectron-Run2017E-31Mar2018-v1',
-            'SingleElectron-Run2017F-31Mar2018-v1',
-            'TTTo2L2Nu_TuneCP5_PSweights_13TeV-powheg-pythia8',
-            'TTToHadronic_TuneCP5_PSweights_13TeV-powheg-pythia8',
-            'TTToSemiLeptonic_TuneCP5_PSweights_13TeV-powheg-pythia8',
-            'W1JetsToLNu_LHEWpT_100-150_TuneCP5_13TeV-amcnloFXFX-pythia8',
-            'W1JetsToLNu_LHEWpT_150-250_TuneCP5_13TeV-amcnloFXFX-pythia8',
-            'W1JetsToLNu_LHEWpT_250-400_TuneCP5_13TeV-amcnloFXFX-pythia8',
-            'W1JetsToLNu_LHEWpT_400-inf_TuneCP5_13TeV-amcnloFXFX-pythia8',
-            'W2JetsToLNu_LHEWpT_100-150_TuneCP5_13TeV-amcnloFXFX-pythia8',
-            'W2JetsToLNu_LHEWpT_150-250_TuneCP5_13TeV-amcnloFXFX-pythia8',
-            'W2JetsToLNu_LHEWpT_250-400_TuneCP5_13TeV-amcnloFXFX-pythia8',
-            'W2JetsToLNu_LHEWpT_400-inf_TuneCP5_13TeV-amcnloFXFX-pythia8',
-            'WW_TuneCP5_13TeV-pythia8',
-            'WZ_TuneCP5_13TeV-pythia8',
-            'WminusH_HToBB_WToQQ_M125_13TeV_powheg_pythia8',
-            'WplusH_HToBB_WToLNu_M125_13TeV_powheg_pythia8',
-            'Z1JetsToNuNu_M-50_LHEZpT_150-250_TuneCP5_13TeV-amcnloFXFX-pythia8',
-            'Z1JetsToNuNu_M-50_LHEZpT_250-400_TuneCP5_13TeV-amcnloFXFX-pythia8',
-            'Z1JetsToNuNu_M-50_LHEZpT_400-inf_TuneCP5_13TeV-amcnloFXFX-pythia8',
-            'Z1JetsToNuNu_M-50_LHEZpT_50-150_TuneCP5_13TeV-amcnloFXFX-pythia8',
-            'Z2JetsToNuNU_M-50_LHEZpT_400-inf_TuneCP5_13TeV-amcnloFXFX-pythia8',
-            'Z2JetsToNuNu_M-50_LHEZpT_150-250_TuneCP5_13TeV-amcnloFXFX-pythia8',
-            'Z2JetsToNuNu_M-50_LHEZpT_250-400_TuneCP5_13TeV-amcnloFXFX-pythia8',
-            'Z2JetsToNuNu_M-50_LHEZpT_50-150_TuneCP5_13TeV-amcnloFXFX-pythia8',
-            'ZH_HToBB_ZToLL_M125_13TeV_powheg_pythia8',
-            'ZH_HToBB_ZToNuNu_M125_13TeV_powheg_pythia8',
-            'ZZ_TuneCP5_13TeV-pythia8',
-            'ggZH_HToBB_ZToLL_M125_13TeV_powheg_pythia8',
-            'ggZH_HToBB_ZToNuNu_M125_13TeV_powheg_pythia8',
-            'HTobb_M125_TuneCP5_13TeV-powheg-pythia8',
-            'HTobb_ttTo2L2Nu_M125_TuneCP5_13TeV-powheg-pythia8',
-            'HTobb_ttToSemiLep_M125_TuneCP5_13TeV-powheg-pythia8',
-            ]
 
 DYJets_Hits = []
 ZJets_Hits = []
@@ -123,54 +80,53 @@ for histname in hist_list:
   histo_ = file_in.Get(histname)
   histo_total_weight = file_in.Get('h_total_mcweight_'+histname)
   if 'WJetsToLNu' in histname or 'W1JetsToLNu' in histname or 'W2JetsToLNu' in histname or 'WJetsToLNu_Pt' in histname:
-    xsec = sample_xsec.getXsec(histname)
+    xsec = sample_xsec.getXsec(histname,args.year)
     normlisation = (xsec*luminosity)/(histo_total_weight.Integral())
     histo_.Scale(normlisation)
     WJets_Hists.append(histo_)
   elif 'DYJetsToLL_M-50' in histname or 'DYJetsToLL_Pt' in histname or 'DY1JetsToLL' in histname or 'DY2JetsToLL' in histname or 'DYJetsToLL_Pt' in histname:
-    xsec = sample_xsec.getXsec(histname)
+    xsec = sample_xsec.getXsec(histname,args.year)
     normlisation = (xsec*luminosity)/(histo_total_weight.Integral())
     histo_.Scale(normlisation)
     DYJets_Hits.append(histo_)
   elif 'ZJetsToNuNu' in histname or 'Z1JetsToNuNu' in histname or 'Z2JetsToNuNu' in histname or 'DYJetsToNuNu_PtZ' in histname:
-    xsec = sample_xsec.getXsec(histname)
+    xsec = sample_xsec.getXsec(histname,args.year)
     normlisation = (xsec*luminosity)/(histo_total_weight.Integral())
     histo_.Scale(normlisation)
     ZJets_Hits.append(histo_)
   elif 'GJets_HT' in histname:
-    xsec = sample_xsec.getXsec(histname)
+    xsec = sample_xsec.getXsec(histname,args.year)
     normlisation = (xsec*luminosity)/(histo_total_weight.Integral())
     histo_.Scale(normlisation)
     GJets_Hists.append(histo_)
   elif ('WWTo' in histname) or ('WZTo' in histname) or ('ZZTo' in histname) or ('WW_' in histname) or ('ZZ_' in histname) or ('WZ_' in histname):
-    xsec = sample_xsec.getXsec(histname)
+    xsec = sample_xsec.getXsec(histname,args.year)
     normlisation = (xsec*luminosity)/(histo_total_weight.Integral())
     histo_.Scale(normlisation)
     DIBOSON_Hists.append(histo_)
   elif ('ST_t' in histname) or ('ST_s' in histname):
-    xsec = sample_xsec.getXsec(histname)
+    xsec = sample_xsec.getXsec(histname,args.year)
     normlisation = (xsec*luminosity)/(histo_total_weight.Integral())
     histo_.Scale(normlisation)
     STop_Hists.append(histo_)
   elif ('TTTo' in histname) or ('TT_TuneCUETP8M2T4' in histname):
-    xsec = sample_xsec.getXsec(histname)
+    xsec = sample_xsec.getXsec(histname,args.year)
     normlisation = (xsec*luminosity)/(histo_total_weight.Integral())
     histo_.Scale(normlisation)
     Top_Hists.append(histo_)
   elif ('QCD_HT' in histname) or ('QCD_bEnriched_HT' in histname or ('QCD' in histname and 'BGenFilter' in histname)):
-    xsec = sample_xsec.getXsec(histname)
+    xsec = sample_xsec.getXsec(histname,args.year)
     normlisation = (xsec*luminosity)/(histo_total_weight.Integral())
     histo_.Scale(normlisation)
     QCD_Hists.append(histo_)
   elif 'HToBB' in histname:
-    xsec = sample_xsec.getXsec(histname)
+    xsec = sample_xsec.getXsec(histname,args.year)
     normlisation = (xsec*luminosity)/(histo_total_weight.Integral())
     histo_.Scale(normlisation)
     SMH_Hists.append(histo_)
-  elif 'MET-Run2017' in histname:
+  elif 'MET-Run' in histname:
     MET_Hists.append(histo_)
 
-print(MET_Hists)
 for i in range(len(WJets_Hists)):
   if i == 0:
     WJets = WJets_Hists[i]
@@ -259,6 +215,7 @@ QCD.Add(Tot_Bkg,-1)
 binVal = {}
 bin_integral = {}
 integral = QCD.Integral()
+print(integral)
 for key in range(1,total_bins+1):
   ibin = 1
   binVal[key] = 0
@@ -289,4 +246,3 @@ for key in range(1,total_bins+1):
 qcdDphiCTS_tot.Write()
 qcdDphiCTS_tot2.Write()
 file_out.Close()
-

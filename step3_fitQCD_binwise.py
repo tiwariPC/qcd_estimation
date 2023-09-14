@@ -1,6 +1,6 @@
 import ROOT as ROOT
 from array import array
-import inflect
+# import inflect
 import os, sys
 import numpy as np
 import argparse
@@ -10,6 +10,7 @@ usage = "python step3_fitQCD_binwise.py -i <input File> -O <output Directory>"
 parser = argparse.ArgumentParser(description=usage)
 parser.add_argument("-i", "--inputfile", dest="inputfile", default="myfiles.root")
 parser.add_argument("-O", "--outputdir", dest="outputdir", default=".")
+parser.add_argument("-y", "--year", dest="year", default="Year")
 
 args = parser.parse_args()
 
@@ -25,6 +26,25 @@ else:
 
 if not os.path.exists(outputdir):
     os.makedirs(outputdir)
+
+runOn2016 = False
+runOn2017 = False
+runOn2018 = False
+if args.year == '2016':
+    runOn2016 = True
+elif args.year == '2017':
+    runOn2017 = True
+elif args.year == '2018':
+    runOn2018 = True
+else:
+    print('Please provide on which year you want to run?')
+
+if runOn2016:
+  luminosity_ = '{0:.1f}'.format(35.90)
+elif runOn2017:
+  luminosity_ = '{0:.1f}'.format(41.50)
+elif runOn2018:
+  luminosity_ = '{0:.1f}'.format(59.64)
 
 ROOT.gStyle.SetOptFit(0)
 ROOT.gStyle.SetOptStat(0)
@@ -90,7 +110,6 @@ def HistStyle(hist, title):
     return hist
 
 def drawenergy1D(is2017, text_="Work in progress 2018", data=True):
-    luminosity_ = '{0:.2f}'.format(41.50)
     #pt = ROOT.TPaveText(0.0877181,0.9,0.9580537,0.96,"brNDC")
     pt = ROOT.TPaveText(0.0877181, 0.95, 0.9580537, 0.96, "brNDC")
     pt.SetBorderSize(0)
@@ -235,11 +254,11 @@ def fitEachBin(mainhisto,myFunc,parameter,fitUptoBin,binstr):
     c.Close()
     return None
 
-fin = ROOT.TFile.Open(inputfile, "READ")
+fin = ROOT.TFile.Open('rootFiles/'+inputfile, "READ")
 
-binstr_dict = {1:'First',2:'Second',3:'Third',4:'Fourth',5:'Fifth',6:'Sixth'}
+binstr_dict = {1:'First',2:'Second',3:'Third',4:'Fourth'}#,5:'Fifth',6:'Sixth'}
 
-for i in range(1,6):
+for i in range(1,5):
     mainhisto = fin.Get("qcdDphiCTS_bin"+str(i))
     myFunc = "[0]*exp([1]*x)"
     fitEachBin(mainhisto,myFunc,2,3.14,binstr_dict[i])

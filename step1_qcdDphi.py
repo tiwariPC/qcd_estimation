@@ -23,15 +23,15 @@ else:
 
 
 files = glob(inputDir+'/*.root')
-file_out = ROOT.TFile(outputfile, 'RECREATE')
+file_out = ROOT.TFile('rootFiles/'+outputfile, 'RECREATE')
 # file_out.cd()
 histo_list = []
 for file_in in files:
   binx_ = np.linspace(0.0, 1.0, num = 41)
   # binx_ = np.linspace(0.0, 0.5, num=21)
   # binx_ = np.linspace(0.0, 3.14, num=101)
-  # biny_ = [0.0 , 0.25, 0.50 , 0.75, 1.0] ## for bbdm
-  biny_ = [200., 250., 290., 360., 420., 1000.] ## for monoH
+  biny_ = [0.0 , 0.25, 0.50 , 0.75, 1.0] ## for bbdm
+  # biny_ = [200., 250., 290., 360., 420., 1000.] ## for monoH
   qcdDphi = ROOT.TH2F(file_in.split('/')[-1].strip('.root'),file_in.split('/')[-1].strip('.root'),len(binx_)-1,array.array('d', binx_),len(biny_)-1,array.array('d', biny_))
   h_total_mcweight = ROOT.TH1F('h_total_mcweight_'+file_in.split('/')[-1].strip('.root'), 'h_total_mcweight_'+file_in.split('/')[-1].strip('.root'), 2, 0, 2)
 
@@ -49,7 +49,7 @@ for file_in in files:
   #     #print(dPhi_jetMET,ctsValue,weight)
   #     hist_list.append([dPhi_jetMET,MET,weight])
   #     #qcdDphi.Fill(dPhi_jetMET,ctsValue,weight)
-  
+
   for df in read_root(file_in, 'bbDM_QCDbCR_2b', columns=['dPhi_jetMET', 'dEtaJet12', 'weight'], chunksize=125000):
     for dPhi_jetMET, dEtaJet12, weight in zip(df.dPhi_jetMET, df.dEtaJet12, df.weight):
       if dPhi_jetMET == -9999: continue
@@ -74,8 +74,6 @@ for file_in in files:
   histo_list.append(qcdDphi)
   histo_list.append(h_total_mcweight)
 
-print(hist_list)
-#file_out.Write()
 file_out.cd()
 for hist in histo_list:
   hist.Write()
