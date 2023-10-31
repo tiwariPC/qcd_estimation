@@ -9,28 +9,38 @@ import array
 usage = "python step1_qcdDphi.py -i <input Directory> -o <output File>"
 parser = argparse.ArgumentParser(description=usage)
 parser.add_argument("-i", "--inputDir", dest="inputDir", default="inputDir")
-parser.add_argument("-o", "--outputfile", dest="outputfile", default="step1_qcdDphi_output.root")
+parser.add_argument("-c", "--category", dest="category", default="2b")
+parser.add_argument("-y", "--year", dest="year", default="Year")
+
 args = parser.parse_args()
 if args.inputDir == None:
     sys.exit()
 else:
     inputDir = args.inputDir
 
-if args.outputfile == None:
+if args.category == None:
     sys.exit()
 else:
-    outputfile = args.outputfile
+    category = args.category
 
+if args.year == None:
+    sys.exit()
+else:
+    year = args.year
 
 files = glob(inputDir+'/*.root')
-file_out = ROOT.TFile('rootFiles/'+outputfile, 'RECREATE')
+file_out = ROOT.TFile('rootFiles/step1_qcdDphi_'+category+'_'+year+'.root', 'RECREATE')
 # file_out.cd()
 histo_list = []
 for file_in in files:
   binx_ = np.linspace(0.0, 1.0, num = 41)
   # binx_ = np.linspace(0.0, 0.5, num=21)
   # binx_ = np.linspace(0.0, 3.14, num=101)
-  biny_ = [0.0 , 0.25, 0.50 , 0.75, 1.0] ## for bbdm
+  if '1b' in category:
+    biny_ = [250, 300, 400, 550, 1000]
+  elif '2b' in category:
+    biny_ = [0.0 , 0.25, 0.50 , 0.75, 1.0]
+
   # biny_ = [200., 250., 290., 360., 420., 1000.] ## for monoH
   qcdDphi = ROOT.TH2F(file_in.split('/')[-1].strip('.root'),file_in.split('/')[-1].strip('.root'),len(binx_)-1,array.array('d', binx_),len(biny_)-1,array.array('d', biny_))
   h_total_mcweight = ROOT.TH1F('h_total_mcweight_'+file_in.split('/')[-1].strip('.root'), 'h_total_mcweight_'+file_in.split('/')[-1].strip('.root'), 2, 0, 2)
@@ -42,29 +52,23 @@ for file_in in files:
   h_total_mcweight.Add(h_tmp_weight)
 
   hist_list = []
-  # for df in read_root(file_in, 'bbDM_QCDbCR_1b', columns=['min_dPhi', 'MET', 'weight'], chunksize=125000):
-  #   for dPhi_jetMET, MET, weight in zip(df.min_dPhi, df.MET, df.weight):
-  #     if dPhi_jetMET == -9999: continue
-  #     # ctsValue = abs(math.tanh(dEtaJet12/2))
-  #     #print(dPhi_jetMET,ctsValue,weight)
-  #     hist_list.append([dPhi_jetMET,MET,weight])
-  #     #qcdDphi.Fill(dPhi_jetMET,ctsValue,weight)
 
-  for df in read_root(file_in, 'bbDM_QCDbCR_2b', columns=['dPhi_jetMET', 'dEtaJet12', 'weight'], chunksize=125000):
-    for dPhi_jetMET, dEtaJet12, weight in zip(df.dPhi_jetMET, df.dEtaJet12, df.weight):
-      if dPhi_jetMET == -9999: continue
-      ctsValue = abs(math.tanh(dEtaJet12/2))
-      #print(dPhi_jetMET,ctsValue,weight)
-      hist_list.append([dPhi_jetMET,ctsValue,weight])
-      #qcdDphi.Fill(dPhi_jetMET,ctsValue,weight)
+  if '1b' in category:
+    for df in read_root(file_in, 'bbDM_WmunuQCDCR_1b', columns=['dPhi_jetMET', 'MET', 'weight'], chunksize=125000):
+      for dPhi_jetMET, MET, weight in zip(df.dPhi_jetMET, df.MET, df.weight):
+        if dPhi_jetMET == -9999: continue
+        #print(dPhi_jetMET,ctsValue,weight)
+        hist_list.append([dPhi_jetMET,MET,weight])
+        #qcdDphi.Fill(dPhi_jetMET,ctsValue,weight)
 
-  # for df in read_root(file_in, 'bbDM_SR_2b', columns=['dPhi_jetMET', 'dEtaJet12', 'weight'], chunksize=125000):
-  #   for dPhi_jetMET, dEtaJet12, weight in zip(df.dPhi_jetMET, df.dEtaJet12, df.weight):
-  #     if dPhi_jetMET == -9999: continue
-  #     ctsValue = abs(math.tanh(dEtaJet12/2))
-  #     #print(dPhi_jetMET,ctsValue,weight)
-  #     hist_list.append([dPhi_jetMET,ctsValue,weight])
-  #     #qcdDphi.Fill(dPhi_jetMET,ctsValue,weight)
+  elif '2b' in category:
+    for df in read_root(file_in, 'bbDM_QCDbCR_2b', columns=['dPhi_jetMET', 'dEtaJet12', 'weight'], chunksize=125000):
+      for dPhi_jetMET, dEtaJet12, weight in zip(df.dPhi_jetMET, df.dEtaJet12, df.weight):
+        if dPhi_jetMET == -9999: continue
+        ctsValue = abs(math.tanh(dEtaJet12/2))
+        #print(dPhi_jetMET,ctsValue,weight)
+        hist_list.append([dPhi_jetMET,ctsValue,weight])
+        #qcdDphi.Fill(dPhi_jetMET,ctsValue,weight)
 
   #print(hist_list)
   for i in range(len(hist_list)):
