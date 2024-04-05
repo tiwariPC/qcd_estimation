@@ -64,10 +64,26 @@ def ExtraText(text_, x_, y_):
         ltx.Draw('same')
     return ltx
 
+def calculate_chi_square(mainhist, fittedhist, start_range, end_range):
+    chi2_ = 0.0
+    ndf = 0
+    # Loop over bins in the specified range and calculate chi-square contributions
+    for bin in range(mainhist.FindBin(start_range), mainhist.FindBin(end_range) + 1):
+        observed = mainhist.GetBinContent(bin)
+        expected = fittedhist.GetBinContent(bin)
+        error = mainhist.GetBinError(bin)/2
+        if error <= 0.0 and observed <= 0: continue
+        chi2Contrib = ((observed - expected) / error) ** 2
+        chi2_ += chi2Contrib
+        ndf += 1
+    # chi2_ndf = chi2_/num_bins
+    # return chi2_
+    chi2_per_ndf = chi2_ / ndf if ndf > 0 else 0  # Calculate chi-square per degree of freedom
+    return chi2_per_ndf
 
 
 def leg():
-    leg = ROOT.TLegend(0.65, 0.55, 0.88,0.850,'',"brNDC")
+    leg = ROOT.TLegend(0.62, 0.62, 0.88,0.90,'',"brNDC")
     leg.SetTextSize(0.052)
     leg.SetBorderSize(0)
     leg.SetLineStyle(8)
@@ -90,8 +106,8 @@ def HistStyle(hist, title):
     hist.GetXaxis().SetTitleOffset(1)
     hist.GetXaxis().SetTitleFont(42)
     hist.GetYaxis().SetTitle(title)
-    hist.GetYaxis().CenterTitle(1)
-    hist.GetYaxis().SetNdivisions(505)
+    # hist.GetYaxis().CenterTitle(1)
+    hist.GetYaxis().SetNdivisions(508)
     hist.GetYaxis().SetLabelFont(42)
     hist.GetYaxis().SetLabelSize(0.05)
     hist.GetYaxis().SetTitleSize(0.05)
@@ -114,7 +130,8 @@ def drawenergy1D(is2017, text_="Work in progress 2018", data=True):
     preliminarytextfize = cmstextSize * 0.7
     lumitextsize = cmstextSize * 0.7
     pt.SetTextSize(cmstextSize)
-    text = pt.AddText(0.03, 0.57, "#font[61]{CMS}")
+    # text = pt.AddText(0.03, 0.57, "#font[61]{CMS}")
+    text = pt.AddText(0.06, 0.57, "#font[61]{CMS}")
 
     #pt1 = ROOT.TPaveText(0.0877181,0.9,0.9580537,0.96,"brNDC")
     pt1 = ROOT.TPaveText(0.0877181, 0.95, 0.9580537, 0.96, "brNDC")
@@ -125,7 +142,7 @@ def drawenergy1D(is2017, text_="Work in progress 2018", data=True):
 
     pt1.SetTextSize(preliminarytextfize)
     #text1 = pt1.AddText(0.215,0.4,text_)
-    text1 = pt1.AddText(0.15, 0.4, text_)
+    text1 = pt1.AddText(0.18, 0.4, text_)
 
     #pt2 = ROOT.TPaveText(0.0877181,0.9,0.9580537,0.96,"brNDC")
     pt2 = ROOT.TPaveText(0.0877181, 0.95, 0.9580537, 0.96, "brNDC")
@@ -148,9 +165,9 @@ def drawenergy1D(is2017, text_="Work in progress 2018", data=True):
         pavetext = "13 TeV"
 
     if data:
-        text3 = pt2.AddText(0.65, 0.5, pavetext)
+        text3 = pt2.AddText(0.68, 0.5, pavetext)
     if not data:
-        text3 = pt2.AddText(0.65, 0.5, pavetext)
+        text3 = pt2.AddText(0.68, 0.5, pavetext)
 
     return [pt, pt1, pt2]
 
@@ -183,7 +200,8 @@ def fitEachBin(mainhisto,myFunctionList,parameter,fitUptoBin,binstr,cr):
     Fit Histogram Here
     ======================
     '''
-    tobeFitHisto.Fit(PrevFitTMP, "LFRS", "", 0, fitUptoBin)
+    # tobeFitHisto.Fit(PrevFitTMP, "LFRS", "", 0, fitUptoBin)
+    mainhisto.Fit(PrevFitTMP, "LFRS", "", 0, fitUptoBin)
 
     # Create a histogram to hold the confidence intervals
     bin_edges = array('d',np.append(np.linspace(0.0, 3.10, num = 125), 3.14))
@@ -191,6 +209,9 @@ def fitEachBin(mainhisto,myFunctionList,parameter,fitUptoBin,binstr,cr):
     ROOT.TVirtualFitter.GetFitter().GetConfidenceIntervals(hint)
 
     print('chi2',PrevFitTMP.GetChisquare())
+    print("Chi-square for range 0.0 to 0.5:", calculate_chi_square(mainhisto, hint, 0.0, 0.5))
+    print("Chi-square for range 0.0 to "+str(fitUptoBin)+":", calculate_chi_square(mainhisto, hint, 0.0, fitUptoBin))
+    print("Chi-square for range "+str(fitUptoBin)+" to 0.5:", calculate_chi_square(mainhisto, hint, fitUptoBin, 0.5))
     param = {i:PrevFitTMP.GetParameter(i) for i in range(parameter)}
     param_err = {i:PrevFitTMP.GetParError(i) for i in range(parameter)}
 
@@ -205,43 +226,43 @@ def fitEachBin(mainhisto,myFunctionList,parameter,fitUptoBin,binstr,cr):
         myFuncPost = myFuncPost.replace("["+str(key)+"]",str(param[key]))
     print("myFuncPost",myFuncPost)
     PostFitTMP = ROOT.TF1("PostFitTMP", myFuncPost, 0, 3.14)
-    print('Integral PrevFitTMP:',PrevFitTMP.Integral(0.5,3.14))
-    print('IntegralError PrevFitTMP:',PrevFitTMP.IntegralError(0.5,3.14))
-
-    # normfactor = 41
-    # nominal_qcdReg = PostFitTMP.Integral(0,0.5)*normfactor
-    # error_qcdReg = ((PrevFitTMP_sigUP.Integral(0,0.5)-PrevFitTMP_sigDown.Integral(0,0.5))*normfactor)/2
-    # print('Integral(0,0.5)', nominal_qcdReg, error_qcdReg)
-
-    # nominal_sigReg = PostFitTMP.Integral(0.5,3.14)*normfactor
-    # error_sigReg = ((PrevFitTMP_sigUP.Integral(0.5,3.14)-PrevFitTMP_sigDown.Integral(0.5,3.14))*normfactor)/2
-    # print('Integral(0.5,3.14)', nominal_sigReg,error_sigReg)
-
     error = array('d', [0.0])
     integral = hint.IntegralAndError(hint.FindBin(0.5), hint.FindBin(3.14), error)
     print("The integral is", integral, "+/-", error[0])
-
     bintemp_dict = {'First':1,'Second':2,'Third':3,'Fourth':4}
-    # QCDSigBins.update({bintemp_dict[binstr]:[nominal_sigReg,error_sigReg]})
     QCDSigBins.update({bintemp_dict[binstr]:[integral,error[0]]})
     fitparam = 'Fit Parameters:'
     chi2ndf = '\Chi^{2}/ndf = '+str('{0:.3f}'.format(PrevFitTMP.GetChisquare()))+'/'+str(PrevFitTMP.GetNDF())
     param_print = {key:'p'+str(key)+' = '+str('{0:.2f}'.format(param[key]))+'\pm'+str('{0:.2f}'.format(param_err[key])) for key in param}
 
-    t2d1 = ExtraText(str(cr).replace('QCDCR_',' '), 0.32, 0.80)
-    t2d1.SetTextSize(0.05)
-    t2d1.SetTextAlign(12)
-    t2d1.SetNDC(ROOT.kTRUE)
-    t2d1.SetTextFont(62)
+    # t2d1 = ExtraText(str(cr).replace('QCDCR_',' '), 0.32, 0.80)
+    # t2d1.SetTextSize(0.05)
+    # t2d1.SetTextAlign(12)
+    # t2d1.SetNDC(ROOT.kTRUE)
+    # t2d1.SetTextFont(62)
 
-    ylocation = 0.45
-    t2d0 = ExtraText(str(fitparam), 0.58, ylocation)
+    t2d1tl = ExtraText("#splitline{QCD}{#splitline{Region}{(#Delta#phi<0.5)}}", 0.42, 0.55)
+    t2d1tl.SetTextSize(0.04)
+    t2d1tl.SetTextAlign(12)
+    t2d1tl.SetNDC(ROOT.kTRUE)
+    t2d1tl.SetTextFont(42)
+    t2d1tl.SetTextColor(ROOT.kBlue)
+
+    t2d1tr = ExtraText('#splitline{Analysis}{#splitline{Region}{(#Delta#phi>0.5)}}', 0.6, 0.55)
+    t2d1tr.SetTextSize(0.04)
+    t2d1tr.SetTextAlign(12)
+    t2d1tr.SetNDC(ROOT.kTRUE)
+    t2d1tr.SetTextFont(42)
+    t2d1tr.SetTextColor(ROOT.kBlue)
+
+    ylocation = 0.420
+    t2d0 = ExtraText(str(fitparam), 0.63, ylocation)
     t2d0.SetTextSize(0.04)
     t2d0.SetTextAlign(12)
     t2d0.SetNDC(ROOT.kTRUE)
     t2d0.SetTextFont(62)
     ylocation =  ylocation-0.05
-    t2d = ExtraText(str(chi2ndf), 0.58, ylocation)
+    t2d = ExtraText(str(chi2ndf), 0.64, ylocation)
     t2d.SetTextSize(0.04)
     t2d.SetTextAlign(12)
     t2d.SetNDC(ROOT.kTRUE)
@@ -250,7 +271,7 @@ def fitEachBin(mainhisto,myFunctionList,parameter,fitUptoBin,binstr,cr):
     t2dp = {}
     for key in param:
         ylocation -= 0.05
-        t2dp.update({key:ExtraText(str(param_print[key]), 0.58, ylocation)})
+        t2dp.update({key:ExtraText(str(param_print[key]), 0.64, ylocation)})
         t2dp[key].SetTextSize(0.04)
         t2dp[key].SetTextAlign(12)
         t2dp[key].SetNDC(ROOT.kTRUE)
@@ -260,7 +281,7 @@ def fitEachBin(mainhisto,myFunctionList,parameter,fitUptoBin,binstr,cr):
     Draw Histograms Here
     ======================
     '''
-    c.cd()
+    maxXaxis = 1.0
     leg_ = leg()
     leg_.AddEntry(tobeFitHisto," Used for Fit","PLE")
     leg_.AddEntry(mainhisto, " All points", "PLE")
@@ -271,15 +292,26 @@ def fitEachBin(mainhisto,myFunctionList,parameter,fitUptoBin,binstr,cr):
     mainhisto.SetLineColor(6)
     mainhisto.SetMarkerColor(6)
     mainhisto.SetLineWidth(2)
-    mainhisto.SetMaximum(mainhisto.GetMaximum()*1.1)
-    mainhisto.SetMinimum(mainhisto.GetMinimum()*1)
-    mainhisto.GetXaxis().SetRangeUser(0,3.14)
+    # mainhisto.SetMaximum(mainhisto.GetMaximum()*1.1)
+    mainhisto.SetMaximum(mainhisto.GetMaximum()*5)  ## for log scale
+    # mainhisto.SetMinimum(mainhisto.GetMinimum()*1)
+    mainhisto.GetXaxis().SetRangeUser(0,maxXaxis)
     mainhisto.Draw("LE hist")
     PrevFitTMP.Draw("same")
     tobeFitHisto.Draw("PLE same")
     hint.SetStats(False)
     hint.SetFillColor(8)
-    hint.SetFillColorAlpha(8, 0.371);
+    # hint_combined_error = hint.Clone("hint_combined_error")
+    # for i in range(1, hint_combined_error.GetNbinsX() + 1):
+    #     default_error = hint.GetBinError(i)
+    #     flat_error = hint.GetBinContent(i) * 0.2
+    #     combined_error = (default_error**2 + flat_error**2)**0.5
+    #     hint_combined_error.SetBinError(i, combined_error)
+    #     # hint_combined_error.SetBinContent(i, combined_error)
+    # # Set fill color for the combined error bars
+    # hint_combined_error.SetFillColorAlpha(ROOT.kRed, 0.371)  # Set fill color with transparency
+    # hint_combined_error.Draw("same e3")
+    hint.SetFillColorAlpha(ROOT.kGreen, 0.4)
     hint.Draw("e3 same")
     PrevFitTMP_sigUP.SetLineStyle(2)
     PrevFitTMP_sigUP.SetLineColor(8)
@@ -290,13 +322,15 @@ def fitEachBin(mainhisto,myFunctionList,parameter,fitUptoBin,binstr,cr):
     PostFitTMP.SetLineStyle(2)
     PostFitTMP.SetLineColor(2)
     PostFitTMP.Draw('same')
-    t2d1.Draw("same")
+    # t2d1.Draw("same")
+    t2d1tl.Draw("same")
+    t2d1tr.Draw("same")
     t2d0.Draw("same")
     t2d.Draw("same")
     for key in param:
         t2dp[key].Draw("same")
     leg_.Draw()
-    linex = ROOT.TLine(0, 0, 3.14, 0)
+    linex = ROOT.TLine(0, 0, maxXaxis, 0)
     linex.SetLineStyle(2)
     linex.SetLineColor(ROOT.kBlack)
     linex.Draw('same')
@@ -305,11 +339,11 @@ def fitEachBin(mainhisto,myFunctionList,parameter,fitUptoBin,binstr,cr):
     liney.SetLineWidth(2)
     liney.SetLineColor(ROOT.kBlue)
     liney.Draw('same')
-    pt = drawenergy1D(True, text_="  Internal", data=True)
+    pt = drawenergy1D(True, text_="  Preliminary", data=True)
     for ipt in pt:
         ipt.Draw()
     c.SetGrid(1,1)
-    # c.SetLogy()
+    c.SetLogy()
     c.Update()
     if not os.path.exists(args.year+'/'+cr):
         os.makedirs(args.year+'/'+cr)
@@ -326,17 +360,20 @@ fin = ROOT.TFile.Open('rootFiles/step2/step2_qcdDphi_'+args.year+'.root', "READ"
 file_out = ROOT.TFile('rootFiles/step3/step3_fitQCD_binwise_'+args.year+'.root', 'RECREATE')
 
 crs = ['QCDbCR_1b', 'QCDbCR_2b', 'ZeeQCDCR_2j', 'ZeeQCDCR_3j', 'ZmumuQCDCR_2j', 'ZmumuQCDCR_3j', 'WenuQCDCR_1b', 'WmunuQCDCR_1b', 'TopenuQCDCR_2b', 'TopmunuQCDCR_2b']
-# crs=[ 'QCDbCR_1b']
+# crs=[ 'QCDbCR_2b']
 
 for cr in crs:
     c = myCanvas1D()
     binstr_dict = {1:'First',2:'Second',3:'Third',4:'Fourth'}#,5:'Fifth',6:'Sixth'}
-    if ('1b' in cr) or ('2j' in cr):
-        fitrange = 0.4
-    elif ('2b' in cr) or ('3j' in cr):
-        fitrange = 0.4
     for i in range(1,5):
         mainhisto = fin.Get("qcdDphiCTS_"+cr+"_bin"+str(i))
+        mainhisto.Sumw2()
+        if mainhisto.GetMaximum() <= 10:
+            fitrange = 0.5
+        elif mainhisto.GetMaximum() > 10 and mainhisto.GetMaximum() < 50:
+            fitrange = 0.4
+        else:
+            fitrange = 0.3
         listOfmyFunction = [
             "[0]*exp([1]*x)+[2]",
             "[0]*exp([1]*x)",

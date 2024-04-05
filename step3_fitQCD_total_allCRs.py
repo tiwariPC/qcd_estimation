@@ -45,9 +45,9 @@ ROOT.gStyle.SetLineWidth(2)
 
 def myCanvas1D():
     c = ROOT.TCanvas("myCanvasName", "The Canvas Title", 650, 600)
-    c.SetBottomMargin(0.11)
+    c.SetBottomMargin(0.12)
     c.SetRightMargin(0.020)
-    c.SetLeftMargin(0.19)
+    c.SetLeftMargin(0.15)
     c.SetTopMargin(0.074)
     return c
 
@@ -63,9 +63,8 @@ def ExtraText(text_, x_, y_):
         ltx.Draw('same')
     return ltx
 
-
 def leg():
-    leg = ROOT.TLegend(0.65, 0.55, 0.88,0.850,'',"brNDC")
+    leg = ROOT.TLegend(0.62, 0.62, 0.88,0.90,'',"brNDC")
     leg.SetTextSize(0.052)
     leg.SetBorderSize(0)
     leg.SetLineStyle(8)
@@ -79,7 +78,8 @@ def HistStyle(hist, title):
     hist.SetLineWidth(3)
     hist.SetMarkerStyle(20)
     hist.SetLineColor(1)
-    hist.GetXaxis().SetTitle("minimum #Delta#phi(Jet,MET)")
+    # hist.GetXaxis().SetTitle("min(#Delta#phi(Jet,p_{T}^{miss}))")
+    hist.GetXaxis().SetTitle("min(#Delta#phi(jet, #it{#vec{p}}_{#font[42]{T}}^{ miss}))")
     # hist.GetXaxis().SetRange(0,1)
     hist.GetXaxis().SetNdivisions(508)
     hist.GetXaxis().SetLabelFont(42)
@@ -88,12 +88,12 @@ def HistStyle(hist, title):
     hist.GetXaxis().SetTitleOffset(1)
     hist.GetXaxis().SetTitleFont(42)
     hist.GetYaxis().SetTitle(title)
-    hist.GetYaxis().CenterTitle(1)
-    hist.GetYaxis().SetNdivisions(505)
+    # hist.GetYaxis().CenterTitle(1)
+    hist.GetYaxis().SetNdivisions(508)
     hist.GetYaxis().SetLabelFont(42)
     hist.GetYaxis().SetLabelSize(0.05)
     hist.GetYaxis().SetTitleSize(0.06)
-    hist.GetYaxis().SetTitleOffset(1.4)
+    hist.GetYaxis().SetTitleOffset(1.1)
     hist.GetYaxis().SetTitleFont(42)
     hist.GetZaxis().SetLabelFont(42)
     hist.GetZaxis().SetTitleOffset(1)
@@ -112,7 +112,7 @@ def drawenergy1D(is2017, text_="Work in progress 2018", data=True):
     preliminarytextfize = cmstextSize * 0.7
     lumitextsize = cmstextSize * 0.7
     pt.SetTextSize(cmstextSize)
-    text = pt.AddText(0.03, 0.57, "#font[61]{CMS}")
+    text = pt.AddText(0.05, 0.57, "#font[42]{ CMS}")
 
     #pt1 = ROOT.TPaveText(0.0877181,0.9,0.9580537,0.96,"brNDC")
     pt1 = ROOT.TPaveText(0.0877181, 0.95, 0.9580537, 0.96, "brNDC")
@@ -123,7 +123,7 @@ def drawenergy1D(is2017, text_="Work in progress 2018", data=True):
 
     pt1.SetTextSize(preliminarytextfize)
     #text1 = pt1.AddText(0.215,0.4,text_)
-    text1 = pt1.AddText(0.15, 0.4, text_)
+    text1 = pt1.AddText(0.18, 0.4, text_)
 
     #pt2 = ROOT.TPaveText(0.0877181,0.9,0.9580537,0.96,"brNDC")
     pt2 = ROOT.TPaveText(0.0877181, 0.95, 0.9580537, 0.96, "brNDC")
@@ -146,9 +146,9 @@ def drawenergy1D(is2017, text_="Work in progress 2018", data=True):
         pavetext = "13 TeV"
 
     if data:
-        text3 = pt2.AddText(0.65, 0.5, pavetext)
+        text3 = pt2.AddText(0.68, 0.5, pavetext)
     if not data:
-        text3 = pt2.AddText(0.65, 0.5, pavetext)
+        text3 = pt2.AddText(0.68, 0.5, pavetext)
 
     return [pt, pt1, pt2]
 
@@ -163,13 +163,13 @@ def fitWorkflow(mainhisto,myFunc,parameter,fitUptoBin,cr):
     PrevFitTMP = ROOT.TF1("PrevFitTMP", myFunc, 0, fitUptoBin)
     PrevFitTMP.SetParLimits(0, 0.0, 2E4) # Set a lower limit of 0 for parameter [0]
     # PrevFitTMP.SetParLimits(1, -1E6,0.0) # Set a lower limit of 0 for parameter [1]
-    PrevFitTMP.SetParLimits(2, 0.0, 0.1) # Set a lower limit of 0 for parameter [2]
+    PrevFitTMP.SetParLimits(2, 0.0, 0.5) # Set a lower limit of 0 for parameter [2]
     if ('1b' in cr) or ('2j' in cr):
-        tobeFitHisto = HistStyle(tobeFitHisto, "#bf{p_{T}^{miss} Yield}")
-        mainhisto = HistStyle(mainhisto, "#bf{p_{T}^{miss} Yield}")
+        tobeFitHisto = HistStyle(tobeFitHisto, "p_{T}^{miss} Yield")
+        mainhisto = HistStyle(mainhisto, "p_{T}^{miss} Yield}")
     elif ('2b' in cr) or ('3j' in cr):
-        tobeFitHisto = HistStyle(tobeFitHisto, "#bf{cos#Theta* Yield}")
-        mainhisto = HistStyle(mainhisto, "#bf{cos#Theta* Yield}")
+        tobeFitHisto = HistStyle(tobeFitHisto, "cos#Theta* Yield")
+        mainhisto = HistStyle(mainhisto, "cos#Theta* Yield")
     tobeFitHisto.SetNameTitle("QCD Extrapolation","QCD Extrapolation")
 
     ''''x`
@@ -200,35 +200,42 @@ def fitWorkflow(mainhisto,myFunc,parameter,fitUptoBin,cr):
     print("Fit Function with parameters: "+str(myFuncPost))
     PostFitTMP = ROOT.TF1("PostFitTMP", myFuncPost, 0, 3.14)
 
-    # normfactor = 41
-    # nominal_qcdReg = PostFitTMP.Integral(0,0.5)*normfactor
-    # error_qcdReg = ((PrevFitTMP_sigUP.Integral(0,0.5)-PrevFitTMP_sigDown.Integral(0,0.5))*normfactor)/2
-    # print('Integral(0,0.5)', nominal_qcdReg, error_qcdReg)
-
-    # nominal_sigReg = PostFitTMP.Integral(0.5,3.14)*normfactor
-    # error_sigReg = ((PrevFitTMP_sigUP.Integral(0.5,3.14)-PrevFitTMP_sigDown.Integral(0.5,3.14))*normfactor)/2
-    # print('Integral(0.5,3.14)', nominal_sigReg,error_sigReg)
-
-    error = array('d', [0.0])
-    integral = hint.IntegralAndError(hint.FindBin(0.5), hint.FindBin(3.14), error)
-    print("The integral is", integral, "+/-", error)
+    error_cls = array('d', [0.0])
+    integral = hint.IntegralAndError(hint.FindBin(0.5), hint.FindBin(3.14), error_cls)
+    print("The integral is", integral, "+/-", error_cls)
 
     fitparam = 'Fit Parameters:'
-    chi2ndf = '\Chi^{2}/ndf = '+str('{0:.3f}'.format(PrevFitTMP.GetChisquare()))+'/'+str(PrevFitTMP.GetNDF())
+    chi2ndf = '\chi^{2}/ndf = '+str('{0:.3f}'.format(PrevFitTMP.GetChisquare()))+'/'+str(PrevFitTMP.GetNDF())
     param_print = {key:'p'+str(key)+' = '+str('{0:.2f}'.format(param[key]))+'\pm'+str('{0:.2f}'.format(param_err[key])) for key in param}
-    t2d1 = ExtraText(str(cr).replace('QCDCR_',' '), 0.32, 0.80)
-    t2d1.SetTextSize(0.05)
-    t2d1.SetTextAlign(12)
-    t2d1.SetNDC(ROOT.kTRUE)
-    t2d1.SetTextFont(62)
-    ylocation = 0.45
-    t2d0 = ExtraText(str(fitparam), 0.58, ylocation)
+
+    # t2d1 = ExtraText(str(cr).replace('QCDCR_',' '), 0.15, 0.880)
+    # t2d1.SetTextSize(0.05)
+    # t2d1.SetTextAlign(12)
+    # t2d1.SetNDC(ROOT.kTRUE)
+    # t2d1.SetTextFont(62)
+
+    t2d1tl = ExtraText("#splitline{QCD}{#splitline{Region}{(#Delta#phi<0.5)}}", 0.42, 0.55)
+    t2d1tl.SetTextSize(0.04)
+    t2d1tl.SetTextAlign(12)
+    t2d1tl.SetNDC(ROOT.kTRUE)
+    t2d1tl.SetTextFont(42)
+    t2d1tl.SetTextColor(ROOT.kBlue)
+
+    t2d1tr = ExtraText('#splitline{Analysis}{#splitline{Region}{(#Delta#phi>0.5)}}', 0.6, 0.55)
+    t2d1tr.SetTextSize(0.04)
+    t2d1tr.SetTextAlign(12)
+    t2d1tr.SetNDC(ROOT.kTRUE)
+    t2d1tr.SetTextFont(42)
+    t2d1tr.SetTextColor(ROOT.kBlue)
+
+    ylocation = 0.420
+    t2d0 = ExtraText(str(fitparam), 0.63, ylocation)
     t2d0.SetTextSize(0.04)
     t2d0.SetTextAlign(12)
     t2d0.SetNDC(ROOT.kTRUE)
     t2d0.SetTextFont(62)
     ylocation =  ylocation-0.05
-    t2d = ExtraText(str(chi2ndf), 0.58, ylocation)
+    t2d = ExtraText(str(chi2ndf), 0.64, ylocation)
     t2d.SetTextSize(0.04)
     t2d.SetTextAlign(12)
     t2d.SetNDC(ROOT.kTRUE)
@@ -237,7 +244,7 @@ def fitWorkflow(mainhisto,myFunc,parameter,fitUptoBin,cr):
     t2dp = {}
     for key in param:
         ylocation -= 0.05
-        t2dp.update({key:ExtraText(str(param_print[key]), 0.58, ylocation)})
+        t2dp.update({key:ExtraText(str(param_print[key]), 0.64, ylocation)})
         t2dp[key].SetTextSize(0.04)
         t2dp[key].SetTextAlign(12)
         t2dp[key].SetNDC(ROOT.kTRUE)
@@ -247,6 +254,7 @@ def fitWorkflow(mainhisto,myFunc,parameter,fitUptoBin,cr):
     Draw Histograms Here
     ======================
     '''
+    maxXaxis = 1.0
     lgnd = leg()
     lgnd.AddEntry(tobeFitHisto," Used for Fit","PLE")
     lgnd.AddEntry(PrevFitTMP," Fit","l")
@@ -254,18 +262,32 @@ def fitWorkflow(mainhisto,myFunc,parameter,fitUptoBin,cr):
     # lgnd.AddEntry(PrevFitTMP_sigUP, " #pm 1 #sigma", "l")
     lgnd.AddEntry(hint, " #pm 1 #sigma", "f")
     lgnd.AddEntry(PostFitTMP, " Fit function", "l")
-
     mainhisto.SetLineColor(6)
     mainhisto.SetMarkerColor(6)
     mainhisto.SetLineWidth(2)
-    mainhisto.SetMaximum(mainhisto.GetMaximum()*1.1)
-    mainhisto.SetMinimum(mainhisto.GetMinimum()*1.01)
+    # mainhisto.SetMaximum(mainhisto.GetMaximum()*1.1)
+    mainhisto.SetMaximum(mainhisto.GetMaximum()*5)  ## for log scale
+    # mainhisto.SetMinimum(mainhisto.GetMinimum())
+    mainhisto.GetXaxis().SetRangeUser(0,maxXaxis)
     mainhisto.Draw("LE hist")
     PrevFitTMP.Draw("same")
     tobeFitHisto.Draw("PLE same")
     hint.SetStats(False)
     hint.SetFillColor(8)
-    hint.SetFillColorAlpha(8, 0.371)
+    hint_combined_error = hint.Clone("hint_combined_error")
+    for i in range(1, hint_combined_error.GetNbinsX() + 1):
+        default_error = hint.GetBinError(i)
+        flat_error = hint.GetBinContent(i) * 0.2
+        combined_error = (default_error**2 + flat_error**2)**0.5
+        hint_combined_error.SetBinError(i, combined_error)
+        # hint_combined_error.SetBinContent(i, combined_error)
+    hint_combined_error.Sumw2()
+    error_combined_error = array('d', [0.0])
+    integral_combined_error = hint_combined_error.IntegralAndError(hint_combined_error.FindBin(0.5), hint_combined_error.FindBin(3.14), error_combined_error)
+    print("The combined integral is", integral_combined_error, "+/-", error_combined_error)    # Set fill color for the combined error bars
+
+    # hint_combined_error.Draw("same e3")
+    hint.SetFillColorAlpha(ROOT.kGreen, 0.4)
     hint.Draw("e3 same")
     PrevFitTMP_sigUP.SetLineStyle(2)
     PrevFitTMP_sigUP.SetLineColor(8)
@@ -277,13 +299,15 @@ def fitWorkflow(mainhisto,myFunc,parameter,fitUptoBin,cr):
     PostFitTMP.SetLineColor(2)
     PostFitTMP.Draw('same')
     # FitTMP.Draw("same")
-    t2d1.Draw("same")
+    # t2d1.Draw("same")
+    t2d1tl.Draw("same")
+    t2d1tr.Draw("same")
     t2d0.Draw("same")
     t2d.Draw("same")
     for key in param:
         t2dp[key].Draw("same")
     lgnd.Draw()
-    linex = ROOT.TLine(0, 0, 3.14, 0)
+    linex = ROOT.TLine(0, 0, maxXaxis, 0)
     linex.SetLineStyle(2)
     linex.SetLineColor(ROOT.kBlack)
     linex.Draw('same')
@@ -292,11 +316,11 @@ def fitWorkflow(mainhisto,myFunc,parameter,fitUptoBin,cr):
     liney.SetLineWidth(2)
     liney.SetLineColor(ROOT.kBlue)
     liney.Draw('same')
-    pt = drawenergy1D(True, text_="  Internal", data=True)
+    pt = drawenergy1D(True, text_=" ", data=True)
     for ipt in pt:
         ipt.Draw()
-    c.SetGrid(1,1)
-    # c.SetLogy()
+    # c.SetGrid(1,1)
+    c.SetLogy()
     c.Update()
     if not os.path.exists(args.year+'/'+cr):
         os.makedirs(args.year+'/'+cr)
@@ -308,23 +332,47 @@ def fitWorkflow(mainhisto,myFunc,parameter,fitUptoBin,cr):
     if PrevFitTMP: PrevFitTMP.Delete()
     if tobeFitHisto: tobeFitHisto.Delete()
     if PostFitTMP: PostFitTMP.Delete()
+
+    # Get the total number of bins
+    n_bins = mainhisto.GetNbinsX()
+
+    # Initialize a variable to store the sum of errors
+    sum_errors = []
+
+    # Loop through each bin and sum the errors
+    for i in range(1, n_bins + 1):
+        error = mainhisto.GetBinError(i)
+        sum_errors.append(error)
+    # error_diff = max(sum_errors)-error_cls[0]
+    error_diff = np.mean(sum_errors)-error_cls[0]
+    # Print the  error
+    print("***"*15)
+    print("***"*15)
+    print("==="*5+"0*0"*5+"==="*5)
+    print("ERROR Difference: "+str(error_diff))
+    print("==="*5+"0*0"*5+"==="*5)
+    print("***"*15)
+    print("***"*15)
     return None
 
 
 fin = ROOT.TFile.Open('rootFiles/step2/step2_qcdDphi_'+args.year+'.root', "READ")
 crs = ['QCDbCR_1b', 'QCDbCR_2b','ZeeQCDCR_2j', 'ZeeQCDCR_3j', 'ZmumuQCDCR_2j', 'ZmumuQCDCR_3j', 'WenuQCDCR_1b', 'WmunuQCDCR_1b', 'TopenuQCDCR_2b', 'TopmunuQCDCR_2b']
-# crs=[ 'QCDbCR_1b']
+# crs=[ 'QCDbCR_2b']
 
 for cr in crs:
     c = myCanvas1D()
+    c.SetTicky(1)
+    c.SetTickx(1)
     mainhisto = fin.Get("qcdDphiCTS_"+cr+"_tot")
     myFunc = "[0]*exp([1]*x)+[2]"
-    #  myFunc = "[0]/(exp([1]*x)"
+    #  myFunc = "[0]/(exp([1]*x)"z
     #  myFunc = "[0]*(exp([1]*x)/(x^[2]))"
     # myFunc = "[0]*exp([1]*x)+[2]"
     # myFunc = "[0]*(1-x)/([1]+(x^[2])*exp([3]*x))"
     # myFunc = "[0]*(1-x)^[1]/(x^([2]+[3]*log(x)))"
     # myFunc = "ROOT::Math::Chebyshev9(x,[O],[1],[2],[3],[4],[5],[6],[7],[8],[9])"
     # myFunc = "([0]+[1]*x+[2]*pow(x,2)+[3]*pow(x,3)+[4]*pow(x,4)+[5]*pow(x,5)+[6]*pow(x,6)+[7]*pow(x,7)+[8]*pow(x,8)+[9]*pow(x,9))"
-    fitrange = 0.35
+    if mainhisto.GetMaximum() < 40: fitrange = 0.4
+    else: fitrange = 0.3
     fitWorkflow(mainhisto,myFunc,3,fitrange,cr)

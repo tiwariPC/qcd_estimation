@@ -65,9 +65,7 @@ for file_in in files:
     # binx_ = np.linspace(0.0, 1.0, num = 41)
     binx_ = array('d',np.append(np.linspace(0.0, 3.10, num = 125), 3.14))
     # binx_ = np.linspace(0.0, 3.15, num = 127)
-
     h_total_mcweight = ROOT.TH1F('h_total_mcweight_'+file_in.split('/')[-1].strip('.root'), 'h_total_mcweight_'+file_in.split('/')[-1].strip('.root'), 2, 0, 2)
-
     f_temp = ROOT.TFile.Open(file_in, 'READ')
     h_tmp_weight = f_temp.Get('h_total_mcweight')
     print(file_in.split('/')[-1].strip('.root'), h_tmp_weight.Integral())
