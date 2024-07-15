@@ -13,8 +13,8 @@ do
     # echo python step2_qcdDphi_allCRs.py -y ${year}
     # python step2_qcdDphi_allCRs.py -y ${year}
     # wait
-    echo python step3_fitQCD_total_allCRs.py  -y ${year}
-    python step3_fitQCD_total_allCRs.py  -y ${year}
+    echo python3 step3_fitQCD_total_allCRs.py  -y ${year}
+    python3 step3_fitQCD_total_allCRs.py  -y ${year}
     # wait
     # echo python step3_fitQCD_binwise_allCRs.py  -y ${year}
     # python step3_fitQCD_binwise_allCRs.py  -y ${year}
