@@ -174,11 +174,7 @@ def drawenergy1D(is2017, text_="Work in progress 2018", data=True):
 QCDSigBins = {}
 def fitEachBin(mainhisto,myFunctionList,parameter,fitUptoBin,binstr,cr):
     myFunc = myFunctionList[0]
-    # total_bins = array('d',np.append(np.linspace(0.0, 3.10, num = 125), 3.14))
-    total_bins = np.linspace(0.0, 3.10, num=125)
-    total_bins = np.append(total_bins, 3.14)
-    total_bins = np.round(total_bins, 3)  # Round to two decimal places
-    total_bins = array('d', total_bins)
+    total_bins = array('d',np.append(np.linspace(0.0, 3.10, num = 125), 3.14))
     binsInUse = [i for i in total_bins if i <= fitUptoBin]
     tobeFitHisto = ROOT.TH1F('tobeFitHisto', 'tobeFitHisto', len(binsInUse)-1, array('d', binsInUse))
     for i in range(1,len(binsInUse)+1):
@@ -294,7 +290,7 @@ def fitEachBin(mainhisto,myFunctionList,parameter,fitUptoBin,binstr,cr):
     leg_.AddEntry(hint, " #pm 1 #sigma", "f")
     leg_.AddEntry(PostFitTMP, " Fit function", "l")
     mainhisto.SetLineColor(6)
-    mainhisto.SetMarkerColor(2)
+    mainhisto.SetMarkerColor(6)
     mainhisto.SetLineWidth(2)
     # mainhisto.SetMaximum(mainhisto.GetMaximum()*1.1)
     mainhisto.SetMaximum(mainhisto.GetMaximum()*5)  ## for log scale

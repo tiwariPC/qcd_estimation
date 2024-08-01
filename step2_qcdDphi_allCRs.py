@@ -236,7 +236,6 @@ for cr in crs:
     binVal = {}
     bin_integral = {}
     integral = QCD.Integral()
-    print(integral)
     for key in range(1,total_bins+1):
         ibin = 1
         binVal[key] = 0
@@ -256,9 +255,14 @@ for cr in crs:
     for x in range(1,QCD.GetXaxis().GetNbins()+1):
         total_bin += sum([QCD.GetBinContent(x, i) for i in range(1,5)])
         yVal_tot = integral-total_bin
+        if x == 20:
+            print(ibin,yVal_tot,  total_bin, [QCD.GetBinContent(x, i) for i in range(1,5)])
+
         qcdDphiCTS_tot.SetBinContent(ibin, yVal_tot)
         qcdDphiCTS_tot2.SetBinContent(ibin, yVal_tot)
         ibin+=1
+
+    print([qcdDphiCTS_tot.GetBinContent(ibin) for ibin in range(1,126)])
     qcdDphiCTS_tot.GetXaxis().SetTitle('minimum #Delta#phi(Jet,MET)')
     if ('1b' in cr) or ('2j' in cr):
         qcdDphiCTS_tot.GetYaxis().SetTitle('#bf{p_{T}^{miss} Yield}')

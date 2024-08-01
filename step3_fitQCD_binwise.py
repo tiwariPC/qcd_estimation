@@ -157,7 +157,7 @@ def drawenergy1D(is2017, text_="Work in progress 2018", data=True):
     return [pt, pt1, pt2]
 
 QCDSigBins = {}
-def fitEachBin(mainhisto,myFunc,parameter,fitUptoBin,binstr, file_out):
+def fitEachBin(mainhisto,myFunc,parameter,fitUptoBin,binstr):
     total_bins = np.linspace(0.0, 1.0, num=41)
     binsInUse = [i for i in total_bins if i <= fitUptoBin]
 
@@ -239,7 +239,7 @@ def fitEachBin(mainhisto,myFunc,parameter,fitUptoBin,binstr, file_out):
     '''
 
     leg_ = leg()
-    leg_.AddEntry(tobeFitHisto,"Used for Fit","PLE")
+    leg_.AddEntry(tobeFitHisto," Used for Fit","PLE")
     leg_.AddEntry(mainhisto, " All points", "PLE")
     leg_.AddEntry(PrevFitTMP," Fit","l")
     leg_.AddEntry(PrevFitTMP_sigUP, " #pm 1 #sigma", "l")
@@ -250,23 +250,17 @@ def fitEachBin(mainhisto,myFunc,parameter,fitUptoBin,binstr, file_out):
     # mainhisto.SetMaximum(200)
     # mainhisto.SetMinimum(1)
     mainhisto.Draw("LE hist")
-    file_out.WriteObject(mainhisto, "all_points")
     PrevFitTMP.Draw("same")
-    file_out.WriteObject(PrevFitTMP, "Fit")
     tobeFitHisto.Draw("PLE same")
-    tobeFitHisto.WriteObject(tobeFitHisto, "used_for_fit")
     PrevFitTMP_sigUP.SetLineStyle(2)
     PrevFitTMP_sigUP.SetLineColor(8)
     PrevFitTMP_sigUP.Draw('same')
-    PrevFitTMP_sigUP.WriteObject(PrevFitTMP_sigUP, f"{PrevFitTMP_sigUP.GetName()}")
     PrevFitTMP_sigDown.SetLineStyle(2)
     PrevFitTMP_sigDown.SetLineColor(8)
     PrevFitTMP_sigDown.Draw('same')
-    file_out.WriteObject(PrevFitTMP_sigDown, f"{PrevFitTMP_sigDown.GetName()}")
     PostFitTMP.SetLineStyle(2)
     PostFitTMP.SetLineColor(2)
     PostFitTMP.Draw('same')
-    file_out.WriteObject(PostFitTMP, f"{PostFitTMP.GetName()}")
     t2d0.Draw("same")
     t2d.Draw("same")
     for key in param:
@@ -302,7 +296,7 @@ for i in range(1,5):
     # myFunc = "[0]*exp([1]*x)+[2]"
     # myFunc = "[0]*(1-x)^[1]/(x^([2]+[3]*log(x)))"
     # myFunc = "[0]*(1-x)/([1]+(x^[2])*exp([3]*x))"
-    fitEachBin(mainhisto,myFunc,2,fitrange,binstr_dict[i],file_out)
+    fitEachBin(mainhisto,myFunc,2,fitrange,binstr_dict[i])
 
 print(QCDSigBins)
 
@@ -311,9 +305,9 @@ if '1b' in category:
 elif '2b' in category:
     binx_ = [0.0 , 0.25, 0.50 , 0.75, 1.0]
 qcd_sigReg = ROOT.TH1F('qcd_sigReg','qcd_sigReg',len(binx_)-1,array('d', binx_))
-# for i in QCDSigBins:
-#     qcd_sigReg.SetBinContent(i,QCDSigBins[i][0])
-#     qcd_sigReg.SetBinError(i,QCDSigBins[i][1])
-# file_out.cd()
-# qcd_sigReg.Write()
+for i in QCDSigBins:
+    qcd_sigReg.SetBinContent(i,QCDSigBins[i][0])
+    qcd_sigReg.SetBinError(i,QCDSigBins[i][1])
+file_out.cd()
+qcd_sigReg.Write()
 file_out.Close()

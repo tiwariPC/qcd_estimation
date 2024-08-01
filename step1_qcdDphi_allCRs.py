@@ -102,6 +102,7 @@ for file_in in files:
                     hist_list.append([dPhi_jetMET,ctsValue,weight])
         for i in range(len(hist_list)):
             qcdDphi.Fill(hist_list[i][0],hist_list[i][1],hist_list[i][2])
+        print("bin val", qcdDphi.GetBinContent(20, 4))
         file_out.cd()
         qcdDphi.Write()
         qcdDphi.Reset()
