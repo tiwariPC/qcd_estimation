@@ -63,7 +63,11 @@ crs = ['bbDM_QCDbCR_1b', 'bbDM_QCDbCR_2b', 'bbDM_ZeeQCDCR_2j', 'bbDM_ZeeQCDCR_3j
 histo_list = {}
 for file_in in files:
     # binx_ = np.linspace(0.0, 1.0, num = 41)
-    binx_ = array('d',np.append(np.linspace(0.0, 3.10, num = 125), 3.14))
+    # binx_ = array('d',np.append(np.linspace(0.0, 3.10, num = 125), 3.14))
+    binx_ = np.linspace(0.0, 3.10, num=125)
+    binx_ = np.append(binx_, 3.14)
+    binx_ = np.round(binx_, 3)  # Round to two decimal places
+    binx_ = array('d', binx_)
     # binx_ = np.linspace(0.0, 3.15, num = 127)
     h_total_mcweight = ROOT.TH1F('h_total_mcweight_'+file_in.split('/')[-1].strip('.root'), 'h_total_mcweight_'+file_in.split('/')[-1].strip('.root'), 2, 0, 2)
     f_temp = ROOT.TFile.Open(file_in, 'READ')

@@ -47,7 +47,11 @@ file_out = ROOT.TFile('rootFiles/step2/step2_qcdDphi_'+args.year+'.root', 'RECRE
 crs = ['QCDbCR_1b', 'QCDbCR_2b','ZeeQCDCR_2j', 'ZeeQCDCR_3j', 'ZmumuQCDCR_2j', 'ZmumuQCDCR_3j', 'WenuQCDCR_1b', 'WmunuQCDCR_1b', 'TopenuQCDCR_2b', 'TopmunuQCDCR_2b']
 
 # binx_ = np.linspace(0.0, 1.0, num=41)
-binx_ = array('d',np.append(np.linspace(0.0, 3.10, num = 125), 3.14))
+# binx_ = array('d',np.append(np.linspace(0.0, 3.10, num = 125), 3.14))
+binx_ = np.linspace(0.0, 3.10, num=125)
+binx_ = np.append(binx_, 3.14)
+binx_ = np.round(binx_, 3)  # Round to two decimal places
+binx_ = array('d', binx_)
 # binx_ = np.linspace(0.0, 3.14, num=101)
 for cr in crs:
     qcdDphiCTS = {}

@@ -112,7 +112,7 @@ def drawenergy1D(is2017, text_="Work in progress 2018", data=True):
     preliminarytextfize = cmstextSize * 0.7
     lumitextsize = cmstextSize * 0.7
     pt.SetTextSize(cmstextSize)
-    text = pt.AddText(0.05, 0.57, "#font[42]{ CMS}")
+    text = pt.AddText(0.05, 0.57, "#font[62]{ CMS}")
 
     #pt1 = ROOT.TPaveText(0.0877181,0.9,0.9580537,0.96,"brNDC")
     pt1 = ROOT.TPaveText(0.0877181, 0.95, 0.9580537, 0.96, "brNDC")
@@ -153,8 +153,13 @@ def drawenergy1D(is2017, text_="Work in progress 2018", data=True):
     return [pt, pt1, pt2]
 
 def fitWorkflow(mainhisto,myFunc,parameter,fitUptoBin,cr, file_out):
-    total_bins = array('d',np.append(np.linspace(0.0, 3.10, num = 125), 3.14))
+    # total_bins = array('d',np.append(np.linspace(0.0, 3.10, num = 125), 3.14))
+    total_bins = np.linspace(0.0, 3.10, num=125)
+    total_bins = np.append(total_bins, 3.14)
+    total_bins = np.round(total_bins, 3)  # Round to two decimal places
+    total_bins = array('d', total_bins)
     binsInUse = [i for i in total_bins if i <= fitUptoBin]
+    # binsForallpoints = [i for i in total_bins if i <= 0.5]
 
     tobeFitHisto = ROOT.TH1F('tobeFitHisto', 'tobeFitHisto', len(binsInUse)-1, array('d', binsInUse))
     for i in range(1,len(binsInUse)+1):
@@ -262,7 +267,12 @@ def fitWorkflow(mainhisto,myFunc,parameter,fitUptoBin,cr, file_out):
     # lgnd.AddEntry(PrevFitTMP_sigUP, " #pm 1 #sigma", "l")
     lgnd.AddEntry(hint, " #pm 1 #sigma", "f")
     lgnd.AddEntry(PostFitTMP, " Fit function", "l")
+    mainhisto.SetLineColor(6)
+    mainhisto.SetMarkerColor(6)
+    mainhisto.SetMaximum(mainhisto.GetMaximum()*5)
+    mainhisto.GetXaxis().SetRangeUser(0,maxXaxis)
     mainhisto.Draw("LE hist")
+
     file_out.WriteObject(mainhisto,"all_points")
     PrevFitTMP.Draw("same")
     # PrevFitTMP_nPoints = mainhisto.GetNbinsX()  # Number of points to sample
@@ -273,27 +283,9 @@ def fitWorkflow(mainhisto,myFunc,parameter,fitUptoBin,cr, file_out):
     #     PrevFitTMP_graph.SetPoint(i, PrevFitTMP_x_values[i], PrevFitTMP_y_values[i])
     # file_out.WriteObject(PrevFitTMP_graph, "fit")
 
-    lastbinofPrevFitTMP = mainhisto.FindBin(fitUptoBin)
-    PrevFitTMP_samebinning = mainhisto.Clone("PrevFitTMP_samebinning")
-    PrevFitTMP_samebinning.Reset()
-    for i in range(1,PrevFitTMP_samebinning.GetNbinsX()-1):
-        if i <= lastbinofPrevFitTMP:
-            x = PrevFitTMP_samebinning.GetBinCenter(i)
-            y = PrevFitTMP.Eval(x)
-            PrevFitTMP_samebinning.SetBinContent(i,y)
-        else:
-            PrevFitTMP_samebinning.SetBinContent(i,0)
-    file_out.WriteObject(PrevFitTMP_samebinning, "fit")
+
     tobeFitHisto.Draw("PLE same")
-    lastbinoftobeFitHisto = tobeFitHisto.GetNbinsX()
-    tobeFitHisto_samebinning = mainhisto.Clone("tobeFitHisto_samebinning")
-    tobeFitHisto_samebinning.Reset()
-    for i in range(1,tobeFitHisto_samebinning.GetNbinsX()-1):
-        if i <= lastbinoftobeFitHisto:
-            tobeFitHisto_samebinning.SetBinContent(i,tobeFitHisto.GetBinContent(i))
-        else:
-            tobeFitHisto_samebinning.SetBinContent(i,0)
-    file_out.WriteObject(tobeFitHisto_samebinning, "used_for_fit")
+    file_out.WriteObject(tobeFitHisto, "used_for_fit")
     hint.SetStats(False)
     hint.SetFillColor(8)
     hint_combined_error = hint.Clone("hint_combined_error")
@@ -321,13 +313,14 @@ def fitWorkflow(mainhisto,myFunc,parameter,fitUptoBin,cr, file_out):
     PostFitTMP.SetLineStyle(2)
     PostFitTMP.SetLineColor(2)
     PostFitTMP.Draw('same')
-    PostFitTMP_nPoints = mainhisto.GetNbinsX()  # Number of points to sample
-    PostFitTMP_x_values = [PostFitTMP.GetXmin() + i * (PostFitTMP.GetXmax() - PostFitTMP.GetXmin()) / PostFitTMP_nPoints for i in range(PostFitTMP_nPoints)]
-    PostFitTMP_y_values = [PostFitTMP.Eval(x) for x in PostFitTMP_x_values]
-    PostFitTMP_graph = ROOT.TGraph(PostFitTMP_nPoints)
-    for i in range(PostFitTMP_nPoints):
-        PostFitTMP_graph.SetPoint(i, PostFitTMP_x_values[i], PostFitTMP_y_values[i])
-    file_out.WriteObject(PostFitTMP_graph, "fit_function")
+    # PostFitTMP_nPoints = mainhisto.GetNbinsX()  # Number of points to sample
+    # PostFitTMP_x_values = [PostFitTMP.GetXmin() + i * (PostFitTMP.GetXmax() - PostFitTMP.GetXmin()) / PostFitTMP_nPoints for i in range(PostFitTMP_nPoints)]
+    # PostFitTMP_y_values = [PostFitTMP.Eval(x) for x in PostFitTMP_x_values]
+    # PostFitTMP_graph = ROOT.TGraph(PostFitTMP_nPoints)
+    # for i in range(PostFitTMP_nPoints):
+    #     PostFitTMP_graph.SetPoint(i, PostFitTMP_x_values[i], PostFitTMP_y_values[i])
+    # file_out.WriteObject(PostFitTMP_graph, "fit_function")
+
     # FitTMP.Draw("same")
     # t2d1.Draw("same")
     t2d1tl.Draw("same")

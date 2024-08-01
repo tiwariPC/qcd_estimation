@@ -5,14 +5,14 @@ fileLoc_2018="/eos/cms/store/group/phys_susy/sus-23-008/2018_AnalysedFiles/analy
 
 for year in 2017 # 2016 2018
 do
-    # fileVar="fileLoc_${year}"
-    # eval "fileLoc=\$$fileVar"
-    # echo python step1_qcdDphi_allCRs.py -i ${fileLoc} -y ${year}
-    # python step1_qcdDphi_allCRs.py -i ${fileLoc} -y ${year}
-    # wait
-    # echo python step2_qcdDphi_allCRs.py -y ${year}
-    # python step2_qcdDphi_allCRs.py -y ${year}
-    # wait
+    fileVar="fileLoc_${year}"
+    eval "fileLoc=\$$fileVar"
+    echo python3 step1_qcdDphi_allCRs.py -i ${fileLoc} -y ${year}
+    python3 step1_qcdDphi_allCRs.py -i ${fileLoc} -y ${year}
+    wait
+    echo python3 step2_qcdDphi_allCRs.py -y ${year}
+    python3 step2_qcdDphi_allCRs.py -y ${year}
+    wait
     echo python3 step3_fitQCD_total_allCRs.py  -y ${year}
     python3 step3_fitQCD_total_allCRs.py  -y ${year}
     # wait
